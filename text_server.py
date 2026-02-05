@@ -72,7 +72,7 @@ def add_text():
         data = request.json
         report_data = data['report_data']
 
-        template_path = '/Users/yonniii/Desktop/gaida-2/n8n프로젝트/DB/tmp/report_base_F.png'
+        template_path = 'report_base_F.png'
         img = Image.open(template_path)
         draw = ImageDraw.Draw(img)
 

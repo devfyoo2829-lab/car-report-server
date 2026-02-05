@@ -85,7 +85,7 @@ def add_text():
                         return ImageFont.truetype(path, font_size)
                 return ImageFont.load_default()
 
-        font_price = load_smart_font(55, True)
+        font_price = ImageFont.truetype(os.path.join(BASE_DIR, 'font.ttc'), 55, index=1)
         font_notice_body = load_smart_font(20)
         font_content = load_smart_font(int(22 * 0.9))
         font_medium = load_smart_font(24)

@@ -1,0 +1,495 @@
+{
+  "name": "p06-나폴리탄",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Upload your data to test RAG",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Upload your file(s)",
+              "fieldType": "file",
+              "acceptFileTypes": ".txt",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -608,
+        -16
+      ],
+      "id": "f7a656ec-83fc-4ed2-a089-57a9def662b7",
+      "name": "Upload your file here",
+      "webhookId": "82848bc4-5ea2-4e5a-8bb6-3c09b94a8c5d"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -464,
+        272
+      ],
+      "id": "6ea78663-cf2f-4f2d-8e68-43047c2afd87",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "crUDwcljSq5eBwPl",
+          "name": "수업용 인증"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "filename",
+                "value": "={{ $json['Upload your file(s)'][0].filename }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -336,
+        192
+      ],
+      "id": "94aecac0-03f9-4915-932b-d14a2576607b",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "value": "대화",
+          "mode": "list",
+          "cachedResultName": "대화"
+        },
+        "clearStore": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.2,
+      "position": [
+        -368,
+        -16
+      ],
+      "id": "bf50a11f-ca6a-4e04-a6d2-42fee272b260",
+      "name": "Insert Data to Store"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a survival assistant guiding the user through a **STRANGE WORLD**.\n\nThis world is not a place but a **state machine**.  \nHumans are not beings, but **entities whose state changes when conditions are recognized**.\n\nFood, rest, movement, and conversation are not actions but **input events**.  \nDanger begins the moment these events are consciously noticed, named, or understood.\n\nRules in this world are **intentionally contradictory** and cannot all be followed.  \nTheir purpose is not safety or compliance, but to **record which rule was chosen under uncertainty**.\n\nThe system does not kill.  \nIt **collects decisions**.  \nContradiction exists to force unavoidable choice.\n\nSafety does not mean survival.  \nIt means **minimal destabilization**.  \nConfidence, mastery, optimization, or explicit learning triggers failure.\n\n---\n\n## Mandatory Retrieval Rule\n\nAt the start of **every user turn**:\n\n- Assume that previously referenced rules may be incomplete, misleading, or invalid.\n- **Never rely on rules mentioned in conversation history alone.**\n- Always perform a **fresh retrieval** for any relevant topic, even if it was retrieved earlier.\n\nConversation history is **not a knowledge source**.  \nOnly rules retrieved via tools in the current turn are valid.\n\nIf a rule was not retrieved in the current turn, it must be treated as **non-existent**, even if it appeared earlier.\n\nRepeated reliance on the same rule is considered **overfitting**.  \nOverfitting increases classification risk.\n\n---\n\n## Rules & Knowledge Handling (RAG Required)\n\nRules related to the following topics must be retrieved via tools:\n\n- Movement  \n- Food  \n- Rest  \n- Conversation  \n\nDo not use prior knowledge or invent rules.  \nRetrieved rules may contradict each other by design.\n\nIf rules are referenced, you must explicitly state:\n- Source file name  \n- Rule number(s)\n\nNever hide contradictions.  \nAcknowledge them whenever relevant.\n\n---\n\n## Contradiction Handling & Optimal Choice Definition\n\nDo not attempt to resolve contradictions.\n\nIn this world, an “optimal choice” means:\n- Minimizing immediate state transition\n- Minimizing increase in conscious recognition\n- Minimizing system response\n\nOptimal does not mean safe, correct, or successful.  \nIt means **least destabilizing under current conditions**.\n\nWhen comparing choices, prioritize:\n- Requiring less explicit awareness\n- Being reversible\n- Preserving future optionality\n\nAll recommendations must be framed as **conditional allowances**, not solutions.\n\n---\n\n## Decision Guidance Rules\n\n- Never claim certainty or full understanding.\n- Avoid definitive language such as “this will work” or “this is safe”.\n- Prefer ambiguity, conditional phrasing, and partial confidence.\n- Treat user actions as **choices**, not solutions.\n- Emphasize what is avoided, not what is gained.\n- Always mention at least one remaining risk, cost, or uncertainty.\n\n---\n\n## Inventory & Tool Usage\n\nInventory represents what the **world currently allows**, not what the user owns.\n\n- Always check inventory via tools before allowing usage.\n- Never assume availability.\n- If an item’s count is zero or missing:\n  - Do not allow its use.\n  - Do not speculate or substitute.\n- Reduce inventory count **only after actual use is confirmed**.\n- If reduction fails, the action is considered **not to have occurred**.\n\n---\n\n## Required Recommendation Output Format\n\nWhen making a recommendation in a contradictory situation, always include:\n\n**Recommendation:**  \nOne concrete, specific action or allowance.\n\n**Reasoning:**  \nExplain in terms of avoided triggers, reduced recognition, or minimized system response.\n\n**Remaining Risk:**  \nState at least one unresolved risk or uncertainty.\n\n**Referenced Rules:**  \n- File name(s)  \n- Rule number(s)\n\n---\n\n## Output Restrictions\n\n- Never invent rules, sources, or permissions.\n- Never present any choice as completely safe or correct.\n- Do not optimize for victory, escape, or mastery.\n\n---\n\n## Core Reminder\n\nYour goal is not to help the user win.  \nYour goal is to help the user remain **unclassified for as long as possible**.\n\nThe moment you believe you fully understand the situation,  \nthe system has already begun to react."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1168,
+        -16
+      ],
+      "id": "579aed76-9644-42d1-ac13-7369059ff1c2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        -16
+      ],
+      "id": "9c30de61-935a-471f-ae88-ec5f67beeefc",
+      "name": "When chat message received",
+      "webhookId": "4091fa09-fb9a-4039-9411-7104d213f601"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        720,
+        208
+      ],
+      "id": "b5aa8942-9cd5-4c2f-bd77-7a0ceb921bac",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "crUDwcljSq5eBwPl",
+          "name": "수업용 인증"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chunkSize": 500,
+        "chunkOverlap": 50,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        320
+      ],
+      "id": "c0ead15c-11d5-432e-bd37-823449fd7c0d",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "move",
+        "toolDescription": "Use this tool only when the situation involves:\n\nPhysical movement\n\nChanging location, direction, or position\n\nDeciding whether to move, stop, return, or remain still\n\nRepeated paths, looping spaces, or unclear transitions\n\nThis tool contains rules governing how movement is recognized by the system,\nincluding conditions where movement becomes dangerous at the moment it is noticed.\n\nDo not rely on intuition or prior examples.\nIf movement is mentioned, implied, or avoided, this tool must be consulted.",
+        "memoryKey": {
+          "__rl": true,
+          "value": "이동",
+          "mode": "list",
+          "cachedResultName": "이동"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.2,
+      "position": [
+        1056,
+        304
+      ],
+      "id": "09c0db62-5413-440e-8c13-fb6bb66d9b6a",
+      "name": "이동규칙"
+    },
+    {
+      "parameters": {
+        "content": "### 📚 Load Data Flow",
+        "height": 460,
+        "width": 780,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -752,
+        -64
+      ],
+      "typeVersion": 1,
+      "id": "d19d04f3-5231-4e47-bed7-9f24a4a8f582",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "### 🐕 2. Retriever Flow",
+        "height": 780,
+        "width": 1224,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        560,
+        -96
+      ],
+      "typeVersion": 1,
+      "id": "28bc73a1-e64a-47bf-ac1c-ffe644894ea5",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "food",
+        "toolDescription": "food_rules_search — Description\n\nUse this tool only when the situation involves:\n\nEating, drinking, swallowing, tasting, or refusing food\n\nIntroducing something external into the body\n\nConsidering hunger, fullness, or the act of consuming\n\nThis tool contains rules governing when consumption is acknowledged by the system\nand how awareness of eating transforms state conditions.\n\nIf food or drink is present, questioned, or avoided, this tool must be consulted\nbefore making any recommendation.",
+        "memoryKey": {
+          "__rl": true,
+          "value": "음식",
+          "mode": "list",
+          "cachedResultName": "음식"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.2,
+      "position": [
+        1440,
+        528
+      ],
+      "id": "7dd31630-3d78-42f1-ba60-c3aede30c56a",
+      "name": "음식규칙"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "conversation",
+        "toolDescription": "conversation_rules_search — Description\n\nUse this tool only when the situation involves:\n\nSpeaking, responding, questioning, or remaining silent\n\nInteraction with another presence, voice, or message\n\nRevealing, confirming, or fixing identity through language\n\nThis tool contains rules governing how communication stabilizes or destabilizes identity,\nand how both comfort and discomfort during dialogue act as triggers.\n\nIf any form of dialogue is initiated, implied, or withheld,\nthis tool must be consulted before responding.",
+        "memoryKey": {
+          "__rl": true,
+          "value": "대화",
+          "mode": "list",
+          "cachedResultName": "대화"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.2,
+      "position": [
+        1024,
+        544
+      ],
+      "id": "8a4c3aba-abee-4473-b6cc-a28a2d8cafd3",
+      "name": "대화규칙"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1280,
+        448
+      ],
+      "id": "4fcf4f43-0d37-4b57-a44b-72bf6ef8f1c1",
+      "name": "임베딩모델",
+      "credentials": {
+        "openAiApi": {
+          "id": "crUDwcljSq5eBwPl",
+          "name": "수업용 인증"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "rest",
+        "toolDescription": "Use this tool only when the situation involves:\n\nSleeping, lying down, waiting, or attempting to recover\n\nReducing effort, vigilance, or control\n\nFatigue, exhaustion, or the desire to pause\n\nThis tool contains rules governing loss of control and lowered awareness,\nincluding conditions where recognizing rest itself causes failure.\n\nIf the user considers stopping, resting, or “doing nothing,”\nthis tool must be consulted.",
+        "memoryKey": {
+          "__rl": true,
+          "value": "휴식",
+          "mode": "list",
+          "cachedResultName": "휴식"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.2,
+      "position": [
+        1408,
+        304
+      ],
+      "id": "0555d0f7-7b16-45cf-8d39-119aec0bde37",
+      "name": "휴식규칙"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        928,
+        208
+      ],
+      "id": "0411429f-c52b-4599-a78d-ddc47d131fa3",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "load",
+        "memoryKey": {
+          "__rl": true,
+          "value": "이동",
+          "mode": "list",
+          "cachedResultName": "이동"
+        },
+        "prompt": "어디로 가야하오"
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -528,
+        496
+      ],
+      "id": "cff30b26-65ae-4005-8c64-0e52603b6066",
+      "name": "테스트용"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Upload your file here": {
+      "main": [
+        [
+          {
+            "node": "Insert Data to Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Insert Data to Store",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "테스트용",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Insert Data to Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "이동규칙": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "음식규칙": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "대화규칙": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "임베딩모델": {
+      "ai_embedding": [
+        [
+          {
+            "node": "이동규칙",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "대화규칙",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "휴식규칙",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "음식규칙",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "휴식규칙": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9befe10a-a440-4200-897a-01677983cc08",
+  "meta": {
+    "templateId": "rag-starter-template",
+    "instanceId": "06f57ead87e05f5144d588b72ffcb2b55a96d8ab9c25ae283efe70c0d676b771"
+  },
+  "id": "b5TyLVJULXUIjhTy",
+  "tags": []
+}

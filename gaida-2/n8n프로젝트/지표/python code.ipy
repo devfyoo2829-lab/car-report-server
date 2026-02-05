@@ -1,0 +1,105 @@
+import json
+import pandas as pd
+import os
+import io
+import unicodedata
+import re
+
+def normalize_nfc(text):
+    """맥북(macOS) 등에서 발생할 수 있는 한글 자모 분리 문제를 해결합니다."""
+    if text is None: return ""
+    return unicodedata.normalize('NFC', text)
+
+def clean_rate_value(val):
+    """표 데이터에서 소수점(잔가율) 수치만 추출하여 숫자로 변환합니다."""
+    if pd.isna(val): return 0.0
+    val_str = str(val).replace(" ", "").replace(",", "")
+    # 0.123 형태의 소수점 패턴 추출
+    match = re.search(r"0\.\d+", val_str)
+    return float(match.group()) if match else 0.0
+
+def extract_residual_rates_only(json_path):
+    """
+    documentParse.json 파일을 읽어 잔가율 표만 추출하여 엑셀로 저장합니다.
+    """
+    print(f"--- [작업 시작] JSON 파일 분석: {json_path} ---")
+    
+    if not os.path.exists(json_path):
+        print(f"❌ 오류: {json_path} 파일을 찾을 수 없습니다.")
+        return
+
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except Exception as e:
+        print(f"❌ JSON 로드 실패: {e}")
+        return
+
+    final_df = pd.DataFrame()
+    found_table = False
+
+    # JSON의 elements를 순회하며 테이블 탐색
+    for element in data.get('elements', []):
+        # category가 table이거나 content에 html이 포함된 경우 탐색
+        content_dict = element.get('content', {})
+        html_content = ""
+        
+        if isinstance(content_dict, dict):
+            html_content = content_dict.get('html', '')
+        elif isinstance(element.get('content'), str):
+            # 일부 버전에서는 content가 직접 문자열일 수 있음
+            html_content = element.get('content', '')
+
+        # 잔가율 관련 키워드 체크
+        if any(kw in html_content for kw in ["비영업용", "잔가율", "경과연수"]):
+            print(f"✅ {element.get('page', '?')}페이지에서 잔가율 표를 발견했습니다.")
+            
+            try:
+                # pandas read_html을 사용하여 HTML 표 파싱
+                # lxml 혹은 beautifulsoup4가 필요할 수 있음
+                dfs = pd.read_html(io.StringIO(html_content))
+                if not dfs: continue
+                
+                df = dfs[0]
+                
+                # 데이터 정제: '년' 혹은 '미만' 단어가 포함된 행(데이터 행)만 추출
+                # 첫 번째 열을 기준으로 20년치 데이터를 필터링
+                df_data = df[df.iloc[:, 0].astype(str).str.contains('년|미만', na=False)].copy()
+                
+                # 수치 데이터 정제 (글자 제외하고 소수점 숫자만 남김)
+                for col in range(1, len(df_data.columns)):
+                    df_data.iloc[:, col] = df_data.iloc[:, col].apply(clean_rate_value)
+                
+                # 컬럼명 표준화 (경과연수, 국산승용, 외산승용, 승합, 화물 등)
+                if len(df_data.columns) >= 5:
+                    standard_cols = ['경과연수', '승용_국산', '승용_외산', '승합', '화물']
+                    # 실제 컬럼 수에 맞춰 슬라이싱 혹은 확장
+                    current_cols = df_data.columns.tolist()
+                    for idx, name in enumerate(standard_cols):
+                        if idx < len(current_cols):
+                            df_data = df_data.rename(columns={current_cols[idx]: name})
+                
+                final_df = df_data
+                found_table = True
+                break # 잔가율 표를 찾았으므로 루프 종료
+                
+            except Exception as e:
+                print(f"⚠️ 표 변환 중 오류 발생: {e}")
+
+    if found_table and not final_df.empty:
+        output_name = 'Extracted_Residual_Rates.xlsx'
+        try:
+            # 엑셀 파일로 저장 (xlsxwriter 혹은 openpyxl 필요)
+            final_df.to_excel(output_name, index=False, engine='xlsxwriter')
+            print(f"\n✨ [성공] 잔가율 데이터 추출 완료!")
+            print(f"파일명: {output_name}")
+            print(f"추출된 행 수: {len(final_df)}개 (1년 미만 ~ 20년 데이터)")
+        except Exception as e:
+            # 엑셀 저장 실패 시 CSV로 백업
+            final_df.to_csv('Extracted_Residual_Rates.csv', index=False, encoding='utf-8-sig')
+            print(f"⚠️ 엑셀 저장 실패로 CSV 파일이 생성되었습니다: {e}")
+    else:
+        print("❌ 잔가율 표를 찾지 못했거나 추출된 데이터가 없습니다.")
+
+if __name__ == "__main__":
+    extract_residual_rates_only('documentParse.json')

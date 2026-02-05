@@ -1,0 +1,704 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -800,
+        -224
+      ],
+      "id": "bad19513-5a7e-4322-92d4-1659de0a6805",
+      "name": "자동차등록원부 제출",
+      "webhookId": "277889fd-1cfe-4867-9852-5471705f8868"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -544,
+        -32
+      ],
+      "id": "61e75454-a7a4-48e6-a435-6559d9e4fb7d",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "7wcbLKPlJUn19hFC",
+          "name": "수업용 인증"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -368,
+        -32
+      ],
+      "id": "4212a674-6f0a-4b11-922e-f71de53792ca",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "responses": {
+          "values": [
+            {}
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -800,
+        208
+      ],
+      "id": "bc7e0f0a-a8ce-4557-8c05-b66b7c26db07",
+      "name": "LLM으로 OCR 텍스트 분석",
+      "credentials": {
+        "openAiApi": {
+          "id": "7wcbLKPlJUn19hFC",
+          "name": "수업용 인증"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -496,
+        -224
+      ],
+      "id": "d4273162-b5f0-4311-8606-a660ce65f102",
+      "name": "RAG-벡터에 저장"
+    },
+    {
+      "parameters": {
+        "content": "## 1. 자동차등록원부의 텍스트 추출 및 RAG저장\n-등록원부 PDF/이미지 업로드\n-http request로 OCR사용해 텍스트(raw)추출\n-RAG에 raw텍스트 저장",
+        "height": 448,
+        "width": 688
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -864,
+        -352
+      ],
+      "typeVersion": 1,
+      "id": "f68e5274-a7d9-4920-98ab-82208ec57766",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "그럼 RAG 설정은 어떻게 해야 해?\nA) 인덱싱(저장) 단계 설정\n1) 청크 단위(추천)\n\n등록원부는 “챕터/항목”이 명확해서\n의미 단위로 쪼개는 게 좋다:\n1차: 갑부 / 을부로 나누기 (가능하면 정규식으로)\n2차: 을부는 “권리변동 1건 = 1청크”처럼 더 쪼개기\n\n📌 청크 크기(대략)\n300~800자 정도(너무 길면 검색 정확도 떨어짐)\n오버랩 50~100자 정도\n\n2) 메타데이터(중요)\n벡터스토어에 넣을 때 메타데이터로:\n-section: 갑부/을부\n-doc_id\n-page(가능하면)\n-type: lien/mortgage/seizure ",
+        "height": 448,
+        "width": 368
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -224,
+        -352
+      ],
+      "typeVersion": 1,
+      "id": "91c58538-1201-45f0-b7b1-106b71abcc4e",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "B) 검색(Retrieve) 단계 설정\n\n여기서 핵심은 “질문을 어떻게 던지냐”야.\n\n1) 검색 쿼리는 “필드별로” 따로 던져라\n\n예)\nQuery 1: 저당 근저당 설정 채권최고액\nQuery 2: 말소 해지 해제\nQuery 3: 압류 가압류 압류등록\nQuery 4: 이전등록 제한 처분금지\nQuery 5: 말소 등록원부 말소부활\n\n그리고 각 쿼리에서 top_k=3~5 정도로 가져와서 합치기.\n\n2) 필터를 걸어라\n예: 저당/압류는 대부분 을부에 있으니까\nsection == 을부 필터\n이거 하나만 걸어도 성능 체감 큼.",
+        "height": 416,
+        "width": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        112,
+        128
+      ],
+      "typeVersion": 1,
+      "id": "729b83b5-ab36-4c7a-9ab9-6af026a74f1f",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -736,
+        368
+      ],
+      "id": "f1164582-b22b-4456-9b26-6ca0cb5cfb2b",
+      "name": "Retreive"
+    },
+    {
+      "parameters": {
+        "content": "## 3. LLM으로 필수 필드 추출/ 검증 후 SQL DB저장",
+        "height": 416,
+        "width": 1072
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -864,
+        128
+      ],
+      "typeVersion": 1,
+      "id": "c46cf14f-7052-4f37-a807-f44a344847d0",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -160,
+        192
+      ],
+      "id": "2415601f-9c59-48e8-84bd-4e2f23bec958",
+      "name": "데이터정제"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        224,
+        -272
+      ],
+      "id": "eac6b8e7-6b02-46b0-a40c-eeaa61f3ad0f",
+      "name": "출고가 시세 가져오기"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        384,
+        -272
+      ],
+      "id": "803a17ca-0bb3-43bc-8f06-d72cf2a65800",
+      "name": "시세 DB에 저장",
+      "credentials": {
+        "postgres": {
+          "id": "qZvY1s2Zx8xdabTc",
+          "name": "DB-postgress접근용"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -32,
+        192
+      ],
+      "id": "e43ef178-a9d0-43b5-973c-c4df0c46f540",
+      "name": "차량 DB에 저장",
+      "credentials": {
+        "postgres": {
+          "id": "qZvY1s2Zx8xdabTc",
+          "name": "DB-postgress접근용"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 2. 시세를 DB에 저장",
+        "height": 272,
+        "width": 416
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        160,
+        -352
+      ],
+      "typeVersion": 1,
+      "id": "682a689d-252f-4bb7-8f1f-54f3810942fc",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -816,
+        656
+      ],
+      "id": "d58f8938-28d6-442d-a641-eaa0d3a0aba5",
+      "name": "2./3. 필수 데이터 호출",
+      "credentials": {
+        "postgres": {
+          "id": "qZvY1s2Zx8xdabTc",
+          "name": "DB-postgress접근용"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f9ffc10d-f683-40b2-89eb-801c1f720e61",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -320,
+        208
+      ],
+      "id": "19d22bbe-8cf5-46fa-8e95-91318ef49254",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        208
+      ],
+      "id": "58e61ea2-1158-4964-bf17-09cb184bc79b",
+      "name": "LLM추출 내용 검증"
+    },
+    {
+      "parameters": {
+        "content": "**검증 / 확정 (시스템이 책임지는 단계)**\n\n🔴하는 일\n\nLLM이 말한 내용을 그대로 믿지 않고,\n코드/룰로 다시 확인한다.\n예시: “저당 말소” 검증\n실제 chunk 안에 말소/해지 단어가 있는가?\n날짜 순서가 설정 → 말소 인가?\n을부 섹션이 실제로 존재하는가?\n\n결과 처리\n✔️ 검증 통과 → CONFIRMED\n❓ 애매함 → UNKNOWN\n❌ 불일치 → FAIL\n\n🔴 여기서는 LLM을 다시 부르지 않는다\n(if / else, 문자열 체크, 날짜 비교)\n\n📌 이 단계의 결과물\n👉 확정된 정형 데이터 (SQL 저장용)",
+        "height": 416,
+        "width": 304
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        400,
+        128
+      ],
+      "typeVersion": 1,
+      "id": "4005f3c8-839b-4a6f-bc0d-994c89bda4af",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -496,
+        656
+      ],
+      "id": "f1b92b36-35da-4107-8c7e-38216b784f89",
+      "name": "로직 적용"
+    },
+    {
+      "parameters": {
+        "content": "## 4. 로직 적용",
+        "height": 256,
+        "width": 976
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -864,
+        576
+      ],
+      "typeVersion": 1,
+      "id": "63f5e04b-0e1f-4e39-829e-163caaa45686",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -656,
+        656
+      ],
+      "id": "080f3e2a-1b54-40a9-bddd-a438b222867a",
+      "name": "데이터 정제"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1d2727e5-5145-456b-8339-6dd5851ed501",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -336,
+        656
+      ],
+      "id": "79851ac2-c7d9-4a8a-afff-1d3b4f617396",
+      "name": "If:실패시"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -112,
+        640
+      ],
+      "id": "1304bd7b-6b1f-4fe1-8d0c-02d0f684bd28",
+      "name": "결과 저장",
+      "credentials": {
+        "postgres": {
+          "id": "qZvY1s2Zx8xdabTc",
+          "name": "DB-postgress접근용"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "responses": {
+          "values": [
+            {}
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -832,
+        928
+      ],
+      "id": "a7058d1f-c27a-410f-94dd-fdddb958854f",
+      "name": "리포트 생성기",
+      "credentials": {
+        "openAiApi": {
+          "id": "7wcbLKPlJUn19hFC",
+          "name": "수업용 인증"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 5. 리포트 생성",
+        "height": 288,
+        "width": 608
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -864,
+        848
+      ],
+      "typeVersion": 1,
+      "id": "04a35c9e-bbe2-485c-8e5f-834d8adbe7f5",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -512,
+        928
+      ],
+      "id": "bf8bedfb-8154-4d56-a639-23abc7bddb7e",
+      "name": "양식화된 리포트 발송",
+      "webhookId": "43a38bf2-72c3-455a-8d12-44698940a40b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WjGFowbiAFOGpgRC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -656,
+        -224
+      ],
+      "id": "17c8d6c1-cac7-4e4f-8316-0f9c20277dae",
+      "name": "OCR"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "자동차등록원부 제출": {
+      "main": [
+        [
+          {
+            "node": "OCR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "RAG-벡터에 저장",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "RAG-벡터에 저장",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM으로 OCR 텍스트 분석": {
+      "main": [
+        [
+          {
+            "node": "LLM추출 내용 검증",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG-벡터에 저장": {
+      "main": [
+        []
+      ]
+    },
+    "Retreive": {
+      "ai_tool": [
+        [
+          {
+            "node": "LLM으로 OCR 텍스트 분석",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "데이터정제": {
+      "main": [
+        [
+          {
+            "node": "차량 DB에 저장",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "출고가 시세 가져오기": {
+      "main": [
+        [
+          {
+            "node": "시세 DB에 저장",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2./3. 필수 데이터 호출": {
+      "main": [
+        [
+          {
+            "node": "데이터 정제",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM추출 내용 검증": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "데이터정제",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "LLM으로 OCR 텍스트 분석",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "데이터 정제": {
+      "main": [
+        [
+          {
+            "node": "로직 적용",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "로직 적용": {
+      "main": [
+        [
+          {
+            "node": "If:실패시",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If:실패시": {
+      "main": [
+        [
+          {
+            "node": "결과 저장",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "리포트 생성기": {
+      "main": [
+        [
+          {
+            "node": "양식화된 리포트 발송",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OCR": {
+      "main": [
+        [
+          {
+            "node": "RAG-벡터에 저장",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "853e1bd0-8b47-45a8-a2b5-fca305b8f741",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a12c56532dab232f437503c148273a4f24cad9a15985d78a9cf2116c7dcd9ea0"
+  },
+  "id": "z0X9t8tcBfWTKD9N",
+  "tags": []
+}

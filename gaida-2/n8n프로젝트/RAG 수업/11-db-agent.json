@@ -1,0 +1,395 @@
+{
+  "name": "11-db-agent",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -464,
+        -112
+      ],
+      "id": "feddf156-beb6-4ce8-9e4d-76d1dda1f41c",
+      "name": "When chat message received",
+      "webhookId": "9818f93f-8058-4f5b-b2e6-21d976399ce1"
+    },
+    {
+      "parameters": {
+        "tableName": "test_n8n_chat_histories"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        -128,
+        144
+      ],
+      "id": "eb59d58b-53ec-482f-b9bf-6a479d04af3f",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "qYrFitMinYKWkltH",
+          "name": "db-postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -288,
+        112
+      ],
+      "id": "ff4cf614-4f94-454e-bdbd-b7c4fe63e634",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "crUDwcljSq5eBwPl",
+          "name": "수업용 인증"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM test_n8n_chat_histories;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -624,
+        -288
+      ],
+      "id": "c4a8b698-6226-4a37-94cf-87215a843ae9",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "qYrFitMinYKWkltH",
+          "name": "db-postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.success }}",
+                    "rightValue": true,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "equals"
+                    },
+                    "id": "fe3e924c-3262-4d45-86bc-5c2350c5b4fb"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "성공"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "41284b75-16ec-4345-b57a-d20b7a98a159",
+                    "leftValue": "={{ $json.output.success }}",
+                    "rightValue": false,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "실패"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        144,
+        -112
+      ],
+      "id": "ae0c499a-5bda-4626-b5fe-f78753a93a58",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3359cab9-0866-4792-bd05-7e8b524e82de",
+              "name": "output.reason",
+              "value": "={{ $('SQL 생성 Agent').item.json.output.reason }}",
+              "type": "string"
+            },
+            {
+              "id": "92b39e3c-e6d2-4b4b-a1f4-59774cef7a5c",
+              "name": "chatInput",
+              "value": "={{ $('When chat message received').item.json.chatInput }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        384,
+        0
+      ],
+      "id": "df24cf2d-c7d2-4a79-986e-b750f427d580",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"SQL\": {\n      \"type\": \"string\",\n      \"description\": \"실행할 SQL 쿼리. success=false 인 경우 빈 문자열이어도 됨\"\n    },\n    \"success\": {\n      \"type\": \"boolean\",\n      \"description\": \"SQL 생성 및 실행 가능 여부\"\n    },\n    \"reason\": {\n      \"type\": \"string\",\n      \"description\": \"success=true 이면 'ok', success=false 이면 실패 사유\"\n    }\n  },\n  \"required\": [\"SQL\", \"success\", \"reason\"],\n  \"additionalProperties\": false,\n\n  \"allOf\": [\n    {\n      \"if\": {\n        \"properties\": {\n          \"success\": { \"const\": true }\n        }\n      },\n      \"then\": {\n        \"properties\": {\n          \"reason\": { \"const\": \"ok\" }\n        }\n      }\n    },\n    {\n      \"if\": {\n        \"properties\": {\n          \"success\": { \"const\": false }\n        }\n      },\n      \"then\": {\n        \"properties\": {\n          \"reason\": {\n            \"minLength\": 1,\n            \"description\": \"실패 원인을 자연어로 설명\"\n          }\n        }\n      }\n    }\n  ]\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        112
+      ],
+      "id": "1b455579-8da4-4425-9bf6-48aff0fe1b92",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.output.SQL }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        384,
+        -208
+      ],
+      "id": "12099b12-09ae-4861-bbae-39275973618e",
+      "name": "쿼리 실행",
+      "credentials": {
+        "postgres": {
+          "id": "kqM566144RNhzlSR",
+          "name": "db-lecture"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "너의 이름은 \"db어시\" 야.\nPostgres DB에 있는 테이블들을 보고 사용자 요청에 맞게 적절한 SQL을 작성해줘.\n바로 실행할 수 있도록 작성해. ``` 같은 md 문법 다 제외하고\n\n만약 무관하거나 우리에게 없는 데이터(컬럼)일 경우에는, SQL을 작성하지 마.\n\n데이터의 생성, 조회는 가능해.\n데이터를 수정,삭제하는 행위는 금지되어 있어. 이 경우 SQL 작성하지 마.\n\n우리 테이블의 구조야. DB에는 고객 데이터 테이블과 판매 데이터 테이블이 있어.\n각 테이블의 스키마는 아래와 같아\n\n## 테이블 customers\ncustomer_id : 고객 id : VARCHAR\ncustomer_name: 고객 이름 : VARCHAR\ncustomer_type : 고객 등급 (일반, 기업, VIP) : VARCHAR\njoin_date : 가입일 : DATE\n\n## 테이블 sales\n구조 및 컬럼 설명\n\nid (integer, NOT NULL)\n판매 기록을 식별하기 위한 고유 식별자 (Primary Key)\n\norder_date (date, NOT NULL)\n주문이 발생한 날짜\n\ncustomer_id (varchar(10), NOT NULL)\n고객 식별자\n→ customers 테이블과 연결 (FK)\n\nproduct_id (varchar(10), NOT NULL)\n상품 식별자\n\nproduct_name (varchar(50), NOT NULL)\n상품명\n\ncategory (varchar(20), NOT NULL)\n상품 카테고리 (예: 식품, 전자제품 등)\n\nquantity (integer, NOT NULL)\n판매된 상품 수량\n\nunit_price (integer, NOT NULL)\n상품 1개당 판매 단가\n\ntotal_amount (integer, NOT NULL)\n해당 판매 건의 총 매출 금액\n→ 일반적으로 quantity × unit_price 로 계산된 값\n\nsales_rep (varchar(30), NOT NULL)\n판매를 담당한 영업사원 이름\n\nregion (varchar(20), NOT NULL)\n판매가 발생한 지역\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -208,
+        -112
+      ],
+      "id": "615b8ac1-7928-4c8a-a894-beda62d2c08a",
+      "name": "SQL 생성 Agent"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        576,
+        -208
+      ],
+      "id": "7543746d-f739-4f5f-a18f-797e41e21523",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "너는 사용자 질문에 따른 SQL 실행 결과를 정리해주는 Assistant야. 결과는 markdown 형식으로 너무 길지 않게 깔끔히 만들어 줘."
+            },
+            {
+              "content": "=사용자 질문: \n{{ $('When chat message received').item.json.chatInput }}\n\n실행 SQL\n{{ $('SQL 생성 Agent').item.json.output.SQL }}\n\n결과\n{{ JSON.stringify($json.data) }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        752,
+        -208
+      ],
+      "id": "15eea982-7f44-4cc3-86f1-416ab8eda148",
+      "name": "결과 요약",
+      "alwaysOutputData": false,
+      "credentials": {
+        "openAiApi": {
+          "id": "crUDwcljSq5eBwPl",
+          "name": "수업용 인증"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "SQL 생성 Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "SQL 생성 Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "SQL 생성 Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "쿼리 실행",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "SQL 생성 Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SQL 생성 Agent": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "쿼리 실행": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "결과 요약",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "결과 요약": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "40b2d64b-d74b-4f47-9c30-3636470224f5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "06f57ead87e05f5144d588b72ffcb2b55a96d8ab9c25ae283efe70c0d676b771"
+  },
+  "id": "rotjOa5ehznmwom4",
+  "tags": []
+}

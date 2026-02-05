@@ -66,18 +66,24 @@ def add_text():
         img = Image.open(template_path)
         draw = ImageDraw.Draw(img)
 
-        # [수정] 폰트 로직: 서버(리눅스) 환경에 맞춰 유연하게 대처
+        # [수정] 폰트 로직: 우리가 올린 font.ttc를 최우선으로 사용
         def load_smart_font(font_size, is_bold=False):
-            # 시도해볼 폰트 경로들 (리눅스, 맥 순서)
-            font_paths = [
-                "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if is_bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-                "/System/Library/Fonts/AppleSDGothicNeo.ttc",
-                "/System/Library/Fonts/Helvetica.ttc"
-            ]
-            for path in font_paths:
-                if os.path.exists(path):
-                    return ImageFont.truetype(path, font_size)
-            return ImageFont.load_default()
+            # 1. GitHub에 같이 올린 font.ttc 경로
+            custom_font_path = os.path.join(BASE_DIR, 'font.ttc')
+            
+            # 2. 파일이 있으면 그걸 쓰고, 없으면 시스템 폰트나 기본 폰트 사용
+            if os.path.exists(custom_font_path):
+                return ImageFont.truetype(custom_font_path, font_size)
+            else:
+                # 파일이 없을 때를 대비한 백업 로직
+                font_paths = [
+                    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if is_bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+                    "/System/Library/Fonts/AppleSDGothicNeo.ttc"
+                ]
+                for path in font_paths:
+                    if os.path.exists(path):
+                        return ImageFont.truetype(path, font_size)
+                return ImageFont.load_default()
 
         font_price = load_smart_font(55, True)
         font_notice_body = load_smart_font(20)

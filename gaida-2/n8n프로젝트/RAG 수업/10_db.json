@@ -1,0 +1,378 @@
+{
+  "name": "10_db",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        48
+      ],
+      "id": "2824e880-d384-465c-a56a-30ecfd1f4365",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "naver_news",
+          "mode": "list",
+          "cachedResultName": "naver_news"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        656,
+        -96
+      ],
+      "id": "859af267-a636-436d-a18c-ada9b7f18cd8",
+      "name": "Select rows from a table",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "qYrFitMinYKWkltH",
+          "name": "db-postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "naver_news",
+          "mode": "list",
+          "cachedResultName": "naver_news"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $json.title }}",
+            "content": "={{ $json.description }}",
+            "section": "={{ $json['output[0].content[0].text.sections'] }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "section",
+              "displayName": "section",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        624,
+        80
+      ],
+      "id": "0480757a-b9e1-488b-8702-59bd7f269f2f",
+      "name": "Insert rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "qYrFitMinYKWkltH",
+          "name": "db-postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://openapi.naver.com/v1/search/news.json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpMultipleHeadersAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "인공지능"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -448,
+        48
+      ],
+      "id": "04858c94-cda7-4c7a-b9c8-6f67bdd14601",
+      "name": "Naver News API",
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "05ge6cvlnWBCs7bk",
+          "name": "Naver-API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output[0].content[0].text.sections",
+        "include": "=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        208,
+        -32
+      ],
+      "id": "2ac671f9-907d-499c-b018-de366f7a550d",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "너는 사용자가 보내준 기사 목록을 보고 적절한 기사 섹션을 결정해 줘야해.\n\n섹션 종류는 아래와 같아.\n- 정치\n- 경제\n- 사회\n- 생활/문화\n- IT/과학\n- 세계"
+            },
+            {
+              "content": "={{ JSON.stringify($json.items) }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "schema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"sections\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\",\n        \"enum\": [\n          \"정치\",\n          \"경제\",\n          \"사회\",\n          \"생활/문화\",\n          \"IT/과학\",\n          \"세계\"\n        ]\n      },\n      \"minItems\": 1\n    }\n  },\n  \"required\": [\"sections\"],\n  \"additionalProperties\": false\n}\n"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -80,
+        -32
+      ],
+      "id": "2c4bd172-6c49-4e44-adcc-e013736d97c1",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "crUDwcljSq5eBwPl",
+          "name": "수업용 인증"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "78d58641-7b9d-4450-8051-d43db00f5bdc",
+              "name": "items",
+              "value": "={{ $json.items }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -272,
+        48
+      ],
+      "id": "d88f14d4-2e99-4c0d-bcf9-fb0a59671fc7",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        464,
+        80
+      ],
+      "id": "f267dda7-0aa3-43f1-8d8e-30497555ead8",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "items",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        160
+      ],
+      "id": "6dd1fb85-48ed-457c-af87-6c9e42d53a47",
+      "name": "Split Out1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Naver News API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select rows from a table": {
+      "main": [
+        []
+      ]
+    },
+    "Naver News API": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert rows in a table": {
+      "main": [
+        []
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Insert rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "29896b6c-2b64-464b-acb6-53656721970c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "06f57ead87e05f5144d588b72ffcb2b55a96d8ab9c25ae283efe70c0d676b771"
+  },
+  "id": "7p5WBjpCk16wG2Wg",
+  "tags": []
+}

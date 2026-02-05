@@ -1,0 +1,79 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "db_label",
+              "name": "source",
+              "value": "market_db",
+              "type": "string"
+            },
+            {
+              "id": "db_content",
+              "name": "data",
+              "value": "={{ $json }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1100, 200],
+      "id": "db_labeling",
+      "name": "DB 이름표 달기"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "rag_label",
+              "name": "source",
+              "value": "kaiwa_manual",
+              "type": "string"
+            },
+            {
+              "id": "rag_content",
+              "name": "data",
+              "value": "={{ $json }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1100, 400],
+      "id": "rag_labeling",
+      "name": "RAG 이름표 달기"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 비용 0원: 일상 언어를 KAIWA 전문 용어로 단순 치환\nlet query = $json.query || \"\";\nconst dictionary = {\n  \"휀다\": \"프런트 펜더\",\n  \"뒷범퍼\": \"리어 범퍼\",\n  \"문짝\": \"도어\",\n  \"보닛\": \"후드\"\n};\n\nfor (const [key, value] of Object.entries(dictionary)) {\n  query = query.replace(new RegExp(key, 'g'), value);\n}\n\nreturn { normalized_query: query };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 400],
+      "id": "query_normalize",
+      "name": "비용 없는 질문 정제"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {
+          "systemMessage": "당신은 KAIWA(한국자동차진단보증협회) 지침에 근거하여 차량 가치를 산정하는 전문 진단평가사입니다.\n\n[분석 지침]\n1. 데이터 우선순위: [market_db]의 시장가를 기준으로 삼고, [kaiwa_manual]의 지침서 계수를 적용하여 감가액을 산출합니다.\n2. 계산 수식: 반드시 (시장가) - (사고 감가액) - (기타 보정)의 수식을 명시하세요.\n3. 간결성: 답변은 핵심 수치와 근거 위주로 간결하게 작성하십시오."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [1400, 300],
+      "id": "final_analysis",
+      "name": "최종 가치 분석 모델"
+    }
+  ]
+}

@@ -1,0 +1,673 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[utf-8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
+% Korean support
+\usepackage{kotex}
+
+% Header and footer
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{중고차 시세 분석 에이전트}
+\lhead{공신력 있는 감가 산정 기준}
+\cfoot{Page \thepage\ of \pageref{LastPage}}
+
+% Title formatting
+\title{\textbf{중고차 시세 분석 에이전트를 위한 \\ 공신력 있는 감가 산정 기준}}
+\author{자동차 시세 분석 가이드}
+\date{2026년 2월}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+% ========================================
+\section{개요}
+% ========================================
+
+중고차 시세 분석 에이전트 구축을 위한 공신력 있는 감가 산정 기준 3가지를 파악하고, 각 기관의 공식 자료 링크 및 부위별·연식별 구체적 감가율 기준을 정리한 보고서입니다. 
+
+본 보고서는 자동차관리법에 근거한 법적 기준을 바탕으로 작성되었으며, 중고차 시세 추정에 필요한 구체적 계수와 계산 방법을 제시합니다.
+
+\newpage
+
+% ========================================
+\section{공신력 있는 3대 감가 산정 기준}
+% ========================================
+
+\subsection{1.1 한국자동차진단보증협회 (KAIWA) - 최우선 기준}
+
+\subsubsection{기관 정보}
+
+\begin{itemize}
+  \item \textbf{공식 기관}: 국토교통부 산하 비영리 사단법인
+  \item \textbf{법적 근거}: 자동차관리법 제58조의4, 제58조의5
+  \item \textbf{역할}: 자동차가격 조사·산정자 기준서 발행
+\end{itemize}
+
+\subsubsection{공식 링크 및 자료}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{8cm}|}
+\hline
+\textbf{항목} & \textbf{링크} \\
+\hline
+최신 기준서 (PDF) & \url{https://www.kaiwa.org/assets/images/2022_2.pdf} \\
+\hline
+공식 홈페이지 & \url{https://www.kaiwa.org} \\
+\hline
+가격조사 서비스 & \url{https://www.kaiwa.org/estimate} \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{주요 특징}
+
+\begin{itemize}
+  \item 부위별 감가계수 (50개 이상 부위, 5개 랭크)
+  \item 차량 등급별 차등 계수 (경차 ∼ 럭셔리, 7단계)
+  \item 국산차/수입차 구분 적용
+  \item 사용연수별 잔가율 제공 (7개 구간)
+  \item 교환(X) vs 판금·용접(W) 수리 방식 차등
+\end{itemize}
+
+\newpage
+
+\subsection{1.2 보험개발원 (KIDI) - 시세 기준가격 공식 제공}
+
+\subsubsection{기관 정보}
+
+\begin{itemize}
+  \item \textbf{공식 기관}: 자동차보험통계 및 정보 제공 기관
+  \item \textbf{역할}: 차량기준가액(기준 시세가격) 발표 및 관리
+\end{itemize}
+
+\subsubsection{공식 사이트 및 조회}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{8cm}|}
+\hline
+\textbf{항목} & \textbf{링크} \\
+\hline
+BIGIN 플랫폼 & \url{https://bigin.kidi.or.kr} \\
+\hline
+차량기준가액 조회 & \url{https://bigin.kidi.or.kr:9443/user/nd00044.action} \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{주요 제공 정보}
+
+\begin{itemize}
+  \item \textbf{차량기준가액}: 신차 판매가(부가세 포함) 기준
+  \item \textbf{업데이트 주기}: 분기별 (3월, 6월, 9월, 12월)
+  \item \textbf{구분}: 국산차/수입차, 모델/엔진/변속기/옵션별
+\end{itemize}
+
+\newpage
+
+\subsection{1.3 국토교통부 (MOLIT) - 법적 표준}
+
+\subsubsection{기관 정보}
+
+\begin{itemize}
+  \item \textbf{공식 기관}: 자동차 정책 및 규정 관리 부처
+  \item \textbf{역할}: 자동차가격조사·산정의 법적 표준화
+\end{itemize}
+
+\subsubsection{공식 고시 및 규정}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{8cm}|}
+\hline
+\textbf{항목} & \textbf{링크} \\
+\hline
+최신 고시 & \url{https://www.molit.go.kr/USR/I0204/m_45/dtl.jsp?idx=18628} \\
+\hline
+법령 정보 & \url{https://www.law.go.kr} \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{법적 표준화 내용}
+
+\begin{itemize}
+  \item 자동차관리법 시행규칙 별지 제82호의2: 가격조사·산정서 표준 양식
+  \item KAIWA 기준서 적용 원칙 명시
+  \item 보험개발원 차량기준가액을 기본 기준가격으로 규정
+\end{itemize}
+
+\newpage
+
+% ========================================
+\section{KAIWA 기준서의 구체적 감가계수 체계}
+% ========================================
+
+\subsection{2.1 부위 랭크 분류 (5단계)}
+
+KAIWA 기준서는 차량의 손상 부위를 5개 랭크로 분류하여 각각 다른 감가계수를 적용합니다.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|l|p{8cm}|}
+\hline
+\textbf{랭크} & \textbf{분류} & \textbf{포함 부위} \\
+\hline
+1 & 외판 경량 & 후드, 펜더, 도어, 트렁크 리드, 라디에이터 서포트 \\
+\hline
+2 & 외판 중량 & 쿼터패널(리어 펜더), 루프 패널, 사이드 실 패널 \\
+\hline
+A & 골격 주요 & 프런트 패널, 크로스 멤버, 인사이드 패널, 트렁크 플로어 \\
+\hline
+B & 골격 측면 & 사이드 멤버, 휠 하우스, 필러 패널(A/B/C) \\
+\hline
+C & 골격 바닥 & 대시 패널, 플로어 패널 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{2.2 승용차 부위별 감가계수 (국산 기준)}
+
+다음은 국산 승용차의 주요 부위별 감가계수입니다. 이 값은 기준가격에 대한 감가액을 계산할 때 사용됩니다.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|l|c|c|}
+\hline
+\textbf{랭크} & \textbf{부위} & \textbf{감가계수} & \textbf{중요도} \\
+\hline
+\multirow{5}{*}{1} & 후드 & 120 & 낮음 \\
+& 프런트 펜더 & 60 & 낮음 \\
+& 프런트 도어 & 90 & 낮음 \\
+& 리어 도어 & 81 & 낮음 \\
+& 트렁크 리드 & 75 & 낮음 \\
+\hline
+\multirow{3}{*}{2} & 쿼터패널 & 156 & 중간 \\
+& 루프 패널 & 165 & 중간 \\
+& 사이드 실 패널 & 96 & 중간 \\
+\hline
+\multirow{4}{*}{A} & 프런트 패널 & 144 & 높음 \\
+& 크로스 멤버 & 75 & 높음 \\
+& 인사이드 패널 & 105 & 높음 \\
+& 트렁크 플로어 & 168 & 높음 \\
+\hline
+\multirow{4}{*}{B} & 사이드 멤버(전) & 150 & 높음 \\
+& 사이드 멤버(후) & 126 & 높음 \\
+& 휠 하우스(전) & 156 & 높음 \\
+& 필러 패널(A) & 132 & 높음 \\
+\hline
+\multirow{2}{*}{C} & 대시 패널 & 150 & 매우높음 \\
+& 플로어 패널 & 132 & 매우높음 \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{해석}: 골격 부위(A/B/C)의 감가계수가 외판(1/2)보다 훨씬 높습니다. 이는 골격 손상이 차량의 구조 안정성을 훼손하여 재판매가치를 급락시키기 때문입니다.
+
+\newpage
+
+\subsection{2.3 랭크별 적용계수}
+
+부위 감가계수에 적용되는 랭크별 배수입니다. 최종 감가액은 부위 감가계수에 이 배수를 곱하여 계산됩니다.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|p{6cm}|}
+\hline
+\textbf{랭크} & \textbf{적용계수} & \textbf{의미} \\
+\hline
+1 & 1.0 & 외판 경량 - 기본 감가 수준 \\
+\hline
+2 & 1.4 & 외판 중량 - 1.4배 감가 \\
+\hline
+A & 1.6 & 골격 주요 - 1.6배 감가 \\
+\hline
+B & 1.8 & 골격 측면 - 1.8배 감가 \\
+\hline
+C & 2.0 & 골격 통합 - 2.0배 감가 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{2.4 차량 등급별 계수 (국산차)}
+
+차량의 배기량(가격대)에 따른 등급별 계수입니다. 고급차일수록 손상으로 인한 시세하락이 큽니다.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|p{5cm}|}
+\hline
+\textbf{등급} & \textbf{배기량} & \textbf{계수} & \textbf{특징} \\
+\hline
+경 & $\sim$1.1L & 0.8 & 경차: 감가 적음 \\
+\hline
+III & 1.1$\sim$1.3L & 1.0 & 소형차: 기준 \\
+\hline
+II & 1.3$\sim$1.7L & 1.2 & 중형차: 감가 증가 \\
+\hline
+I & 1.7$\sim$2.1L & 1.4 & 중대형: 감가 더 증가 \\
+\hline
+특A & 2.1$\sim$2.4L & 1.5 & 고급형: 높은 감가 \\
+\hline
+특B & 2.4$\sim$3.0L & 1.8 & 프리미엄: 매우 높은 감가 \\
+\hline
+특C & 3.0L$\sim$ & 2.2 & 럭셔리: 최고 감가 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{2.5 사용연수별 계수}
+
+차량의 나이에 따른 계수입니다. 신차에 가까울수록 손상의 영향이 큽니다.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\textbf{사용 연수} & \textbf{계수} \\
+\hline
+당년$\sim$2년 & 1.0 \\
+\hline
+3년 & 0.9 \\
+\hline
+4년 & 0.8 \\
+\hline
+5년 이상 & 0.7 \\
+\hline
+\end{tabular}
+\end{table}
+
+\newpage
+
+\subsection{2.6 사용연수별 잔가율 (신차 대비)}
+
+차량의 나이에 따른 신차 대비 시세 비율입니다. 이는 손상이 없을 때의 기본 시세를 결정합니다.
+
+\subsubsection{국산 승용/SUV/RV}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\textbf{사용 연수} & \textbf{잔가율} \\
+\hline
+당년$\sim$3년 & 51.8\% \\
+\hline
+4년 & 43.7\% \\
+\hline
+5년 & 36.8\% \\
+\hline
+6년 & 31.1\% \\
+\hline
+7년 이상 & 26.2\% \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{수입차 (BMW, 벤츠 등)}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\textbf{사용 연수} & \textbf{잔가율} \\
+\hline
+당년$\sim$3년 & 50.0\% \\
+\hline
+4년 & 41.2\% \\
+\hline
+5년 & 34.0\% \\
+\hline
+6년 & 28.1\% \\
+\hline
+7년 이상 & 23.2\% \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{활용 예시}: 신차 가격 5,000만원의 3년식 국산차는 손상이 없을 때 약 2,590만원(5,000 × 0.518)의 시세를 가집니다.
+
+\subsection{2.7 수리 방식에 따른 감가 차등}
+
+동일한 부위 손상이라도 수리 방식에 따라 감가율이 다릅니다.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|p{7cm}|}
+\hline
+\textbf{수리 방식} & \textbf{감가계수 적용} & \textbf{비고} \\
+\hline
+교환(X) & 100\% 적용 & 부품 완전 교체 \\
+\hline
+판금·용접(W) & 50\% 적용 & 원형 복원 수리 \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{의미}: 판금·용접 수리(원래 부품 유지)가 부품 교환보다 감가가 적습니다.
+
+\newpage
+
+% ========================================
+\section{중고차 시세 추정 계산 방법}
+% ========================================
+
+\subsection{3.1 최종 시세가격 산정식}
+
+\begin{equation}
+\text{최종시세} = \text{기준가격} - \text{연식감가액} - \text{사고손상감가액}
+\end{equation}
+
+\subsection{3.2 Step별 상세 계산 프로세스}
+
+\subsubsection{Step 1: 기준가격 결정}
+
+\textbf{데이터 출처}: 보험개발원 차량기준가액
+
+\begin{itemize}
+  \item 신차 판매가(부가세 포함) 기준
+  \item 분기별 업데이트 (KIDI BIGIN 플랫폼)
+  \item 조회 링크: \url{https://bigin.kidi.or.kr:9443/user/nd00044.action}
+\end{itemize}
+
+\subsubsection{Step 2: 연식 감가 계산}
+
+\begin{equation}
+\text{연식감가액} = \text{기준가격} \times (1 - \text{잔가율})
+\end{equation}
+
+\begin{equation}
+\text{보정가격(기본 시세)} = \text{기준가격} - \text{연식감가액}
+\end{equation}
+
+\textbf{예시}: 신차가격 3,000만원, 3년식 국산 승용차
+
+\begin{align*}
+\text{잔가율} &: 51.8\% \\
+\text{연식감가액} &= 3,000 \times (1 - 0.518) = 1,446 \text{만원} \\
+\text{보정가격} &= 3,000 - 1,446 = 1,554 \text{만원}
+\end{align*}
+
+\subsubsection{Step 3: 사고 손상 감가 계산}
+
+\begin{equation}
+\text{부위감가액} = \text{보정가격} \times \frac{\text{부위감가계수}}{10,000} \times \text{랭크별계수} \times \text{사용년계수} \times \text{차량등급계수} \times \text{수리방식계수}
+\end{equation}
+
+\textbf{수리방식계수}:
+\begin{itemize}
+  \item 교환: 1.0
+  \item 판금·용접: 0.5
+\end{itemize}
+
+\textbf{예시}: 3년식 고급차(특A), 후드 판금 수리
+
+\begin{align*}
+\text{부위감가액} &= 1,554 \times \frac{120}{10,000} \times 1.0 \times 0.9 \times 1.5 \times 0.5 \\
+&\approx 126 \text{만원}
+\end{align*}
+
+\textbf{다중 손상 시}: 각 부위 손상 감가액을 합산
+
+\begin{equation}
+\text{총손상감가액} = \sum_{i=1}^{n} \text{부위}_{i}\text{감가액}
+\end{equation}
+
+\subsubsection{Step 4: 최종 시세 산정}
+
+\begin{equation}
+\text{최종시세} = \text{보정가격} - \text{총손상감가액}
+\end{equation}
+
+\newpage
+
+% ========================================
+\section{부위별 감가율 구체 예시}
+% ========================================
+
+\subsection{4.1 경미한 사고}
+
+\textbf{사례}: 프런트 휀더 판금 수리 (국산 중형차, 2년식)
+
+\begin{align*}
+\text{기준가격} &: 2,000 \text{만원} \\
+\text{보정가격} &: 2,000 \times 0.618 = 1,236 \text{만원} \\
+\text{부위감가} &: 1,236 \times \frac{60}{10,000} \times 1.0 \times 1.0 \times 1.2 \times 0.5 \\
+&\approx 44 \text{만원} \\
+\text{최종시세} &: 1,236 - 0.44 \approx 1,235.56 \text{만원 (약 98\% 수준)}
+\end{align*}
+
+\subsection{4.2 중간 수준 사고}
+
+\textbf{사례}: 쿼터패널 교환 (국산 SUV, 3년식)
+
+\begin{align*}
+\text{기준가격} &: 3,500 \text{만원} \\
+\text{보정가격} &: 3,500 \times 0.518 = 1,813 \text{만원} \\
+\text{부위감가} &: 1,813 \times \frac{156}{10,000} \times 1.4 \times 0.9 \times 1.2 \times 1.0 \\
+&\approx 427 \text{만원} \\
+\text{최종시세} &: 1,813 - 4.27 \approx 1,388.73 \text{만원 (약 79\% 수준)}
+\end{align*}
+
+\subsection{4.3 심각한 사고}
+
+\textbf{사례}: 프런트 패널 + 사이드 멤버 수리 (프리미엄 수입차, 4년식)
+
+\begin{align*}
+\text{기준가격} &: 6,500 \text{만원} \\
+\text{보정가격} &: 6,500 \times 0.412 = 2,678 \text{만원}
+\end{align*}
+
+\textbf{부위감가 1} (프런트패널 교환, A랭크):
+
+\begin{align*}
+&= 2,678 \times \frac{144}{10,000} \times 1.6 \times 0.8 \times 1.8 \times 1.0 \\
+&\approx 987 \text{만원}
+\end{align*}
+
+\textbf{부위감가 2} (사이드멤버 교환, B랭크):
+
+\begin{align*}
+&= 2,678 \times \frac{150}{10,000} \times 1.8 \times 0.8 \times 1.8 \times 1.0 \\
+&\approx 1,171 \text{만원}
+\end{align*}
+
+\begin{align*}
+\text{총손상감가} &= 987 + 1,171 = 2,158 \text{만원} \\
+\text{최종시세} &: 2,678 - 21.58 \approx 519.22 \text{만원 (약 8\% 수준)} \\
+&\text{(재판매가 거의 불가능한 수준)}
+\end{align*}
+
+\newpage
+
+% ========================================
+\section{에이전트 구축 필수 요소}
+% ========================================
+
+\subsection{5.1 필수 탑재 데이터셋}
+
+다음은 중고차 시세 분석 에이전트를 구축하기 위해 필수적으로 탑재해야 할 데이터입니다.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{4cm}|p{6cm}|c|}
+\hline
+\textbf{데이터 항목} & \textbf{설명} & \textbf{범위} \\
+\hline
+부위별 감가계수표 & KAIWA 기준, 국산/수입 구분 & 50+ 부위, 7 등급 \\
+\hline
+랭크별 적용계수 & 부위 손상 심각도 배수 & 5단계 (1, 2, A, B, C) \\
+\hline
+차량등급 계수 & 차량 가격대별 배수 & 7단계 (경∼특C) \\
+\hline
+사용연수 계수 & 차량 나이 배수 & 5단계 \\
+\hline
+잔가율표 & 신차 대비 시세 비율 & 국산/수입, 7개 구간 \\
+\hline
+차량기준가액 DB & KIDI 분기별 시세 기준 & 1,000+ 모델 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{5.2 데이터 유지보수 계획}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{데이터 항목} & \textbf{업데이트 주기} & \textbf{담당} \\
+\hline
+차량기준가액 & 분기별 (3, 6, 9, 12월) & 자동 수집 \\
+\hline
+KAIWA 기준서 & 연간 또는 필요시 & 수동 확인 \\
+\hline
+부위분류 DB & 수시 (신모델 추가) & 관리자 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{5.3 신뢰성 확보 방안}
+
+\subsubsection{데이터 검증}
+
+\begin{itemize}
+  \item 실제 중고차 거래 시세와 비교
+  \item 카마트, 중고차 매매조합 통계 교차검증
+  \item 이상치 탐지 및 제외
+\end{itemize}
+
+\subsubsection{투명성 확보}
+
+\begin{itemize}
+  \item 감가계수 출처 명시 (KAIWA 기준서 기준)
+  \item 계산 과정 공개
+  \item 예측 신뢰도 표시
+\end{itemize}
+
+\subsubsection{지속적 개선}
+
+\begin{itemize}
+  \item 사용자 피드백 수집
+  \item 실제 거래 데이터와 예측값 비교
+  \item 정기적 모델 재검증
+\end{itemize}
+
+\newpage
+
+% ========================================
+\section{공식 자료 및 참고 링크 종합}
+% ========================================
+
+\subsection{6.1 기관별 공식 링크}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|p{7cm}|}
+\hline
+\textbf{기관} & \textbf{문서명} & \textbf{링크} \\
+\hline
+\multirow{3}{*}{KAIWA} & 2022년 기준서 (PDF) & \url{https://www.kaiwa.org/assets/images/2022_2.pdf} \\
+\cline{2-3}
+& 공식 홈페이지 & \url{https://www.kaiwa.org} \\
+\cline{2-3}
+& 가격조사·산정 서비스 & \url{https://www.kaiwa.org/estimate} \\
+\hline
+\multirow{2}{*}{KIDI} & BIGIN 플랫폼 & \url{https://bigin.kidi.or.kr} \\
+\cline{2-3}
+& 차량기준가액 조회 & \url{https://bigin.kidi.or.kr:9443/user/nd00044.action} \\
+\hline
+\multirow{2}{*}{국토교통부} & 정책정보 (자동차관리) & \url{https://www.molit.go.kr/USR/I0204/m_45/dtl.jsp?idx=18628} \\
+\cline{2-3}
+& 법령정보 (자동차관리법) & \url{https://www.law.go.kr} \\
+\hline
+\end{tabular}
+\end{table}
+
+\newpage
+
+% ========================================
+\section{핵심 정리 및 결론}
+% ========================================
+
+\subsection{7.1 중고차 시세 추정의 3단계 프로세스}
+
+\begin{enumerate}
+  \item \textbf{[Step 1] KIDI 차량기준가액 조회}
+  \begin{itemize}
+    \item 신차 판매가(부가세 포함) 기준 파악
+    \item 분기별 최신 자료 사용
+  \end{itemize}
+
+  \item \textbf{[Step 2] KAIWA 연식별 잔가율 적용}
+  \begin{itemize}
+    \item 차량 나이에 따른 기본 시세 산정
+    \item 국산/수입차 구분 적용
+  \end{itemize}
+
+  \item \textbf{[Step 3] KAIWA 부위별 손상감가 차감}
+  \begin{itemize}
+    \item 사고 부위별, 손상 심각도별 감가 계산
+    \item 최종 시세 확정
+  \end{itemize}
+\end{enumerate}
+
+\subsection{7.2 최우선 데이터 출처}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{3cm}|p{6cm}|}
+\hline
+\textbf{역할} & \textbf{기관} & \textbf{특징} \\
+\hline
+기준가격 & KIDI 보험개발원 & 공식, 분기별 업데이트, 1,000+ 모델 \\
+\hline
+감가계수 & KAIWA & 법적 근거, 가장 상세, 부위별·등급별 차등 \\
+\hline
+법적 표준 & 국토교통부 & 자동차관리법 기반, 표준양식 규정 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{7.3 결론}
+
+중고차 시세를 정확하게 추정하기 위해서는 다음 세 기관의 공식 자료를 올바르게 활용해야 합니다:
+
+\begin{itemize}
+  \item \textbf{기본틀}: 한국자동차진단보증협회(KAIWA) 기준서
+  \begin{itemize}
+    \item 부위별 구체적 감가계수 제공
+    \item 차량 등급별, 연식별 차등 적용
+    \item 수리 방식 구분 (교환/판금)
+  \end{itemize}
+
+  \item \textbf{실무 기준}: 보험개발원(KIDI) 차량기준가액
+  \begin{itemize}
+    \item 신차 판매가 기반 공식 시세
+    \item 분기별 정기 업데이트
+    \item 모델별, 옵션별 세부 정보
+  \end{itemize}
+
+  \item \textbf{법적 근거}: 국토교통부 고시 및 자동차관리법
+  \begin{itemize}
+    \item 가격조사·산정의 법적 표준화
+    \item 표준 양식 규정
+    \item 공신력 확보
+  \end{itemize}
+\end{itemize}
+
+이 세 기관의 공식 자료를 통합하여 적절한 알고리즘을 구성하면, \textbf{객관적이고 법적 근거가 있는 중고차 감가 산정}이 가능하며, 정기적인 업데이트와 시장 데이터 교차검증을 통해 \textbf{신뢰할 수 있는 중고차 시세 분석 에이전트}를 구축할 수 있습니다.
+
+\end{document}

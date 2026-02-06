@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, send_file
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 import os
-import io  # [추가] 메모리 버퍼 사용을 위함
+import io
 
 app = Flask(__name__)
 
@@ -66,10 +66,7 @@ def add_text():
         template_path = os.path.join(BASE_DIR, 'report_base_F.png')
         img = Image.open(template_path)
         
-        # [수정] PDF 변환을 위해 RGBA일 경우 RGB로 변환 (투명도 제거)
-        if img.mode == 'RGBA':
-            img = img.convert('RGB')
-        
+        # PNG는 RGBA를 지원하므로 별도의 모드 변환 없이 진행해도 무방합니다.
         draw = ImageDraw.Draw(img)
 
         # 폰트 로드 함수
@@ -143,18 +140,18 @@ def add_text():
         draw.text((106, 1510), current_date, fill=black, font=font_medium)
         draw.text((img.width // 2, 1460), "1/1", fill=gray, font=font_page, anchor="mm")
 
-        # [핵심 수정 부분] 이미지를 PDF 바이너리로 변환
-        pdf_io = io.BytesIO()
-        # 이미지를 PDF 형식으로 저장 (RGB 모드여야 함)
-        img.save(pdf_io, format='PDF')
-        pdf_io.seek(0)
+        # [핵심 수정 부분] 이미지를 PNG 바이너리로 반환
+        img_io = io.BytesIO()
+        img.save(img_io, format='PNG')
+        img_io.seek(0)
 
-        # PDF 파일로 반환 (mimetype 및 파일명 설정)
+        # PNG 이미지로 반환 (mimetype 설정)
+        # 미리보기를 위해 as_attachment=False로 설정하는 것이 좋습니다.
         return send_file(
-            pdf_io, 
-            mimetype='application/pdf', 
-            as_attachment=True, 
-            download_name='Cartells_Report.pdf'
+            img_io, 
+            mimetype='image/png', 
+            as_attachment=False, 
+            download_name='Cartells_Report.png'
         )
 
     except Exception as e:

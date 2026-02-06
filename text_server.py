@@ -2,10 +2,11 @@ from flask import Flask, request, jsonify, send_file
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 import os
+import io  # [추가] 메모리 버퍼 사용을 위함
 
 app = Flask(__name__)
 
-# [수정] 파일 위치 자동 파악 (맥북/Render 공용 환경 대응)
+# 파일 위치 자동 파악 (맥북/Render 공용 환경 대응)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def wrap_text_with_indent(text, font, max_width, indent=15):
@@ -61,12 +62,17 @@ def add_text():
         data = request.json
         report_data = data['report_data']
 
-        # [수정] 서버 배포를 위해 배경 이미지 경로를 상대 경로로 변경
+        # 배경 이미지 경로 설정
         template_path = os.path.join(BASE_DIR, 'report_base_F.png')
         img = Image.open(template_path)
+        
+        # [수정] PDF 변환을 위해 RGBA일 경우 RGB로 변환 (투명도 제거)
+        if img.mode == 'RGBA':
+            img = img.convert('RGB')
+        
         draw = ImageDraw.Draw(img)
 
-        # 폰트 로드
+        # 폰트 로드 함수
         def load_smart_font(font_size, index=0):
             custom_font_path = os.path.join(BASE_DIR, 'font.ttc')
             if os.path.exists(custom_font_path):
@@ -104,9 +110,9 @@ def add_text():
             val_lines = wrap_text_with_indent(valuation_note, font_notice_body, 920)
             for line in val_lines:
                 draw.text((125, y_val), line, fill=gray, font=font_notice_body)
-                y_val += 25 # 줄 간격
+                y_val += 25
 
-        # 4. [좌표 수정] 저당권 설정 안내
+        # 4. 저당권 설정 안내
         mortgage_info = report_data.get('mortgage_info', {})
         if mortgage_info.get('has_mortgage', False):
             m_amount = mortgage_info.get('mortgage_amount', '0원')
@@ -135,18 +141,25 @@ def add_text():
         # 6. 날짜 및 페이지 번호
         current_date = datetime.now().strftime("%Y년 %m월 %d일")
         draw.text((106, 1510), current_date, fill=black, font=font_medium)
-        
-        # [좌표 수정] 페이지 번호 (기존 1480 -> 1460으로 -20 상향 조정)
         draw.text((img.width // 2, 1460), "1/1", fill=gray, font=font_page, anchor="mm")
 
-        output_path = '/tmp/final_report.png'
-        img.save(output_path)
-        return send_file(output_path, mimetype='image/png')
+        # [핵심 수정 부분] 이미지를 PDF 바이너리로 변환
+        pdf_io = io.BytesIO()
+        # 이미지를 PDF 형식으로 저장 (RGB 모드여야 함)
+        img.save(pdf_io, format='PDF')
+        pdf_io.seek(0)
+
+        # PDF 파일로 반환 (mimetype 및 파일명 설정)
+        return send_file(
+            pdf_io, 
+            mimetype='application/pdf', 
+            as_attachment=True, 
+            download_name='Cartells_Report.pdf'
+        )
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    # 서버 환경(Render)에서는 환경변수 PORT를 사용하므로 아래와 같이 설정하는 것이 권장됩니다.
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
